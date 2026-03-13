@@ -24,7 +24,7 @@ steps:
   inputs:
     authenticationType: 'PowerPlatformEnvironment'
     # REPLACE THIS with the name of your Power Platform Service Connection
-    PowerPlatformEnvironment: 'YOUR_SERVICE_CONNECTION_NAME' 
+    PowerPlatformEnvironment: 'PowerApps-Dev' 
     SolutionName: '$(solutionName)'
     SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName).zip'
     AsyncOperation: true
