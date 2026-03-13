@@ -1,0 +1,34 @@
+trigger: none # Keep manual for the lab
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solutionName: 'ProcurementAgentCore'
+
+steps:
+- checkout: self
+
+- task: PowerPlatformToolInstaller@2
+  displayName: 'Power Platform Tool Installer'
+  inputs:
+    DefaultVersion: true
+
+# 1. Pack the code from GitHub back into a .zip file (Managed format)
+- task: PowerPlatformPackSolution@2
+  displayName: 'Pack Solution into Managed .zip'
+  inputs:
+    SolutionSourceFolder: '$(Build.SourcesDirectory)\$(solutionName)'
+    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_managed.zip'
+    SolutionType: 'Managed'
+
+# 2. Import the Managed .zip into the Test Environment
+- task: PowerPlatformImportSolution@2
+  displayName: 'Deploy to Test Environment'
+  inputs:
+    authenticationType: 'PowerPlatformSPN'
+    # This must match your new Test Service Connection name
+    PowerPlatformSPN: 'PowerApps-Test' 
+    SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_managed.zip'
+    AsyncOperation: true
+    MaxAsyncWaitTime: '60'
