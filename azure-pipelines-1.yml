@@ -16,20 +16,20 @@ steps:
   inputs:
     DefaultVersion: true
 
-# 3. Pack the raw code into a Managed Solution .zip file
+# 3. Pack the raw code into an Unmanaged Solution .zip file
 - task: PowerPlatformPackSolution@2
-  displayName: 'Pack Solution (Managed)'
+  displayName: 'Pack Solution (Unmanaged)'
   inputs:
     SolutionSourceFolder: '$(Build.SourcesDirectory)\$(solutionName)'
-    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_managed.zip'
-    SolutionType: 'Managed'
+    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
+    SolutionType: 'Unmanaged'
 
-# 4. Import the Managed Solution into the Test Environment
+# 4. Import the Unmanaged Solution into the Test Environment
 - task: PowerPlatformImportSolution@2
   displayName: 'Import to Test Environment'
   inputs:
     authenticationType: 'PowerPlatformSPN'
-    PowerPlatformSPN: 'PowerApps-Test' # Make sure this matches your new connection name
-    SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_managed.zip'
+    PowerPlatformSPN: 'PowerApps-Test' # Keep your test connection name!
+    SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
     AsyncOperation: true
     MaxAsyncWaitTime: '60'
