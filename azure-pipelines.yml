@@ -41,12 +41,19 @@ steps:
     git config user.email "alm-bot@lab.local"
     git config user.name "ALM Pipeline Bot"
     
-    # Force the pipeline to create and use a local 'main' branch
-    git checkout -b main || git checkout main
+    # 1. Fetch the absolute latest history from GitHub
+    git fetch origin main
     
+    # 2. Check out the main branch and connect it to GitHub's main
+    git checkout main || git checkout -b main origin/main
+    
+    # 3. Pull the README and any other remote changes to sync the history
+    git pull origin main --rebase
+    
+    # 4. Add the unpacked bot files
     git add .
     git commit -m "Automated export of $(solutionName)" || echo "No changes to commit, skipping."
     
-    # Push the main branch up to GitHub
+    # 5. Push the combined files back to GitHub
     git push origin main
   displayName: 'Commit unpacked code to GitHub'
