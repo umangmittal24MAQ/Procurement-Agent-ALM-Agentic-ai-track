@@ -22,9 +22,8 @@ steps:
 - task: PowerPlatformExportSolution@2
   displayName: 'Export Solution from Dev'
   inputs:
-    authenticationType: 'PowerPlatformEnvironment'
-    # REPLACE THIS with the name of your Power Platform Service Connection
-    PowerPlatformEnvironment: 'PowerApps-Dev' 
+    authenticationType: 'PowerPlatformSPN' 
+    PowerPlatformSPN: 'PowerApps-Dev' 
     SolutionName: '$(solutionName)'
     SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName).zip'
     AsyncOperation: true
