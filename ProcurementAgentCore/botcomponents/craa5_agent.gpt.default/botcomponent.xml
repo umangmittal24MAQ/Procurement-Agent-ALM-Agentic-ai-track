@@ -1,0 +1,10 @@
+<botcomponent schemaname="craa5_agent.gpt.default">
+  <componenttype>15</componenttype>
+  <iscustomizable>0</iscustomizable>
+  <name>Procurement Assistant</name>
+  <parentbotid>
+    <schemaname>craa5_agent</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

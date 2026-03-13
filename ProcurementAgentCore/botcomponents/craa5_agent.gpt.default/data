@@ -1,0 +1,9 @@
+kind: GptComponentMetadata
+displayName: Procurement Assistant
+instructions:
+gptCapabilities:
+  webBrowsing: true
+
+aISettings:
+  model:
+    modelNameHint: sonnet4-5
