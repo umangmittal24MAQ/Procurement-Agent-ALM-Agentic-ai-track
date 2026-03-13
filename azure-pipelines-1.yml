@@ -6,30 +6,62 @@ pool:
 variables:
   solutionName: 'ProcurementAgentCore'
 
-steps:
-# 1. Check out the code from your GitHub repository
-- checkout: self
+jobs:
+# ==========================================
+# STAGE 1: DEPLOY TO TEST
+# ==========================================
+- job: DeployToTest
+  displayName: 'Deploy to Test Environment'
+  steps:
+  - checkout: self
+  
+  - task: PowerPlatformToolInstaller@2
+    displayName: 'Power Platform Tool Installer'
+    inputs:
+      DefaultVersion: true
+      
+  - task: PowerPlatformPackSolution@2
+    displayName: 'Pack Solution (Unmanaged)'
+    inputs:
+      SolutionSourceFolder: '$(Build.SourcesDirectory)\$(solutionName)'
+      SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
+      SolutionType: 'Unmanaged'
+      
+  - task: PowerPlatformImportSolution@2
+    displayName: 'Import to Test'
+    inputs:
+      authenticationType: 'PowerPlatformSPN'
+      PowerPlatformSPN: 'PowerApps-Test' 
+      SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
+      AsyncOperation: true
+      MaxAsyncWaitTime: '60'
 
-# 2. Install the Power Platform Build Tools
-- task: PowerPlatformToolInstaller@2
-  displayName: 'Power Platform Tool Installer'
-  inputs:
-    DefaultVersion: true
-
-# 3. Pack the raw code into an Unmanaged Solution .zip file
-- task: PowerPlatformPackSolution@2
-  displayName: 'Pack Solution (Unmanaged)'
-  inputs:
-    SolutionSourceFolder: '$(Build.SourcesDirectory)\$(solutionName)'
-    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
-    SolutionType: 'Unmanaged'
-
-# 4. Import the Unmanaged Solution into the Test Environment
-- task: PowerPlatformImportSolution@2
-  displayName: 'Import to Test Environment'
-  inputs:
-    authenticationType: 'PowerPlatformSPN'
-    PowerPlatformSPN: 'PowerApps-Test' # Keep your test connection name!
-    SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
-    AsyncOperation: true
-    MaxAsyncWaitTime: '60'
+# ==========================================
+# STAGE 2: DEPLOY TO PROD (REQUIRES APPROVAL)
+# ==========================================
+- job: DeployToProd
+  displayName: 'Deploy to Production Environment'
+  dependsOn: DeployToTest # This tells it to wait for Test to finish first
+  steps:
+  - checkout: self
+  
+  - task: PowerPlatformToolInstaller@2
+    displayName: 'Power Platform Tool Installer'
+    inputs:
+      DefaultVersion: true
+      
+  - task: PowerPlatformPackSolution@2
+    displayName: 'Pack Solution (Unmanaged)'
+    inputs:
+      SolutionSourceFolder: '$(Build.SourcesDirectory)\$(solutionName)'
+      SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
+      SolutionType: 'Unmanaged'
+      
+  - task: PowerPlatformImportSolution@2
+    displayName: 'Import to Prod'
+    inputs:
+      authenticationType: 'PowerPlatformSPN'
+      PowerPlatformSPN: 'PowerApps-Prod' # This connection triggers your manual lock!
+      SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName)_unmanaged.zip'
+      AsyncOperation: true
+      MaxAsyncWaitTime: '60'
