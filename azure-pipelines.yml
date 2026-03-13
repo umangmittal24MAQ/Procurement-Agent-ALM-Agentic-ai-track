@@ -36,12 +36,12 @@ steps:
     SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName).zip'
     SolutionTargetFolder: '$(Build.SourcesDirectory)\$(solutionName)'
 
-# 5. Commit the unzipped files to your GitHub Repository
+
+  # 5. Commit the unzipped files to your GitHub Repository
 - script: |
     git config user.email "alm-bot@lab.local"
     git config user.name "ALM Pipeline Bot"
-    git checkout main
     git add .
-    git commit -m "Automated export of $(solutionName)"
-    git push origin main
+    git commit -m "Automated export of $(solutionName)" || echo "No changes to commit, skipping commit."
+    git push origin HEAD:main || git push origin HEAD:master
   displayName: 'Commit unpacked code to GitHub'
