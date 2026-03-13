@@ -1,0 +1,52 @@
+trigger: none # Keeps this manual for the lab
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  # This must perfectly match the internal Name of your solution in Power Apps
+  solutionName: 'ProcurementAgentCore' 
+
+steps:
+# 1. Check out the GitHub repository and allow the pipeline to push code back
+- checkout: self
+  persistCredentials: true
+
+# 2. Install the necessary Power Platform CLI tools
+- task: PowerPlatformToolInstaller@2
+  displayName: 'Power Platform Tool Installer'
+  inputs:
+    DefaultVersion: true
+
+# 3. Export the Unmanaged Solution from your Dev Environment
+- task: PowerPlatformExportSolution@2
+  displayName: 'Export Solution from Dev'
+  inputs:
+    authenticationType: 'PowerPlatformSPN' 
+    PowerPlatformSPN: 'PowerApps-Dev' 
+    SolutionName: '$(solutionName)'
+    SolutionOutputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName).zip'
+    AsyncOperation: true
+    MaxAsyncWaitTime: '60'
+
+# 4. Unpack the .zip file into readable text/XML files
+- task: PowerPlatformUnpackSolution@2
+  displayName: 'Unpack Solution'
+  inputs:
+    SolutionInputFile: '$(Build.ArtifactStagingDirectory)\$(solutionName).zip'
+    SolutionTargetFolder: '$(Build.SourcesDirectory)\$(solutionName)'
+
+# 5. Commit the unzipped files to your GitHub Repository
+- script: |
+    git config user.email "alm-bot@lab.local"
+    git config user.name "ALM Pipeline Bot"
+    
+    # Force the pipeline to create and use a local 'main' branch
+    git checkout -b main || git checkout main
+    
+    git add .
+    git commit -m "Automated export of $(solutionName)" || echo "No changes to commit, skipping."
+    
+    # Push the main branch up to GitHub
+    git push origin main
+  displayName: 'Commit unpacked code to GitHub'
